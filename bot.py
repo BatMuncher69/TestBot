@@ -89,11 +89,14 @@ async def on_member_remove(member):
 
 def start_check():
 	import startup
-	for function in dir(startup):
-		call = getattr(startup, function)
-		call()
+	for item in dir(startup):
+		item = getattr(startup, item)
+		if callable(item):
+			item()
 
 start_check()
 
-client.run('ODEwNjUzMDYwMDY1NjU2ODg5.YCmxfg.bXv8vFfamz7tjfb5nPHO0MB77Xs')
+with open("./data/token", "r") as f:
+	token = f.read()
 
+client.run(token)
