@@ -1,3 +1,7 @@
+# Common files during development
 __pycache__
 .vscode
 venv/
+
+# Files/dirs created by the bot whouch should not be committed
+data/
