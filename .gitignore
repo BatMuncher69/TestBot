@@ -5,3 +5,6 @@ venv/
 
 # Files/dirs created by the bot whouch should not be committed
 data/
+
+# Files from pycharm
+.idea/
