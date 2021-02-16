@@ -55,12 +55,6 @@ async def unban(ctx, *, member):
 async def clear(ctx, amount=5):
 	await ctx.channel.purge(limit=amount)
 
-
-@client.command()
-async def ping(ctx):
-	await ctx.send(f'Pong {round(client.latency * 1000)}ms')
-
-
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
 	responses = ["It is certain.", 
@@ -92,6 +86,14 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
 	print(f'{member} has fucked off.')
+
+def start_check():
+	import startup
+	for function in dir(startup):
+		call = getattr(startup, function)
+		call()
+
+start_check()
 
 client.run('ODEwNjUzMDYwMDY1NjU2ODg5.YCmxfg.bXv8vFfamz7tjfb5nPHO0MB77Xs')
 
