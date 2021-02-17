@@ -1,18 +1,25 @@
 import discord
 import os
-from discord.ext import commands
+from discord.ext import commands, tasks
+from itertools import cycle
 import random
 import json
 
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
 client = commands.Bot(command_prefix='.', intents=intents)
-
+status = cycle(['Halo', 'with children'])
 
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.online, activity=discord.Game('Bonjour'))
+    change_status.start()
+    await client.change_presence(status=discord.Status.online)
     print('Bot is ready.')
+
+@tasks.loop(seconds=100)
+async def change_status():
+    await client.change_presence(activity=discord.Game(next(status)))
+
 
 
 @client.command()
