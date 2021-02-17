@@ -22,10 +22,23 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Invalid command.')
 
+def admin(ctx):
+    return ctx.author.id == 293019756263374850
+
 
 @client.command()
+@commands.check(admin)
 async def clear(ctx, amount : int):
     await ctx.channel.purge(limit=amount)
+
+
+
+
+@client.command()
+@commands.check(admin)
+async def example(ctx):
+    await ctx.send(f'Bonjour {ctx.author}')
+
 
 @clear.error 
 async def clear_error(ctx, error):
@@ -41,18 +54,21 @@ async def change_status():
 
 
 @client.command()
+@commands.check(admin)
 async def load(ctx, extension):
     client.load_extension(f'cogs.{extension}')
     await ctx.send("Successfully loaded cog {}".format(extension))
 
 
 @client.command()
+@commands.check(admin)
 async def unload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
     await ctx.send("Successfully unloaded cog {}".format(extension))
 
 
 @client.command()
+@commands.check(admin)
 async def reload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
@@ -65,18 +81,21 @@ for filename in os.listdir('./cogs'):
 
 
 @client.command()
+@commands.check(admin)
 async def kick(ctx, member: discord.Member, *, reason=None):
     await member.kick(reason=reason)
     await ctx.send("Successfully kicked {} for reason {}".format(member, reason))
 
 
 @client.command()
+@commands.check(admin)
 async def ban(ctx, member: discord.Member, *, reason=None):
     await member.ban(reason=reason)
     await ctx.send("Successfully banned {} for reason {}".format(member, reason))
 
 
 @client.command()
+@commands.check(admin)
 async def unban(ctx, *, member):
     banned_users = await ctx.guild.bans()
     member_name, member_discriminator = member.split('#')
