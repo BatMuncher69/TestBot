@@ -16,6 +16,24 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online)
     print('Bot is ready.')
 
+
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send('Invalid command.')
+
+
+@client.command()
+async def clear(ctx, amount : int):
+    await ctx.channel.purge(limit=amount)
+
+@clear.error 
+async def clear_error(ctx, error):
+     if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please specify an amount of messages to delete.')
+
+
+
 @tasks.loop(seconds=100)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
@@ -72,9 +90,6 @@ async def unban(ctx, *, member):
             return
 
 
-@client.command()
-async def clear(ctx, amount=5):
-    await ctx.channel.purge(limit=amount)
 
 
 @client.command(aliases=['8ball'])
