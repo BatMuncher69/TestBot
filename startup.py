@@ -13,3 +13,10 @@ def data_dir():
 def token_file():
     if not os.path.exists("./data/token"):
         open("./data/token", "w").close()
+
+
+def auth_json():
+    if not os.path.exists("./data/auth.json"):
+        auth = open("./data/auth.json", "w")
+        auth.write("{}")  # validates json file
+        auth.close()

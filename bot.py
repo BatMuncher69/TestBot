@@ -2,6 +2,8 @@ import discord
 import os
 from discord.ext import commands
 import random
+import json
+
 
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
 client = commands.Bot(command_prefix='.', intents=intents)
@@ -22,6 +24,7 @@ async def load(ctx, extension):
 async def unload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
     await ctx.send("Successfully unloaded cog {}".format(extension))
+
 
 @client.command()
 async def reload(ctx, extension):
@@ -89,6 +92,24 @@ async def _8ball(ctx, *, question):
                  "Outlook not so good.",
                  "Very doubtful."]
     await ctx.send(f'question: {question}\nAnswer: {random.choice(responses)}')
+
+
+@client.command()
+async def shutdown(ctx):
+    with open("./data/auth.json", "r") as auth:
+        authorised_users = json.load(auth)
+
+    for user in authorised_users:
+        if ctx.author.id == int(user):
+            print("triggered")
+            if authorised_users[user] == "all" or authorised_users[user] == "shutdown":
+                await ctx.send("Bot shutting down...")
+                await ctx.bot.logout()
+                await client.close()
+            else:
+                await ctx.send("You do not have permission 'shutdown' or 'all' required to shutdown the bot!")
+                return
+    await ctx.send("You do not have authorised permissions to use this command!")
 
 
 @client.event
