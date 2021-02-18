@@ -171,7 +171,7 @@ async def minecraft(ctx, arg):
     embed = discord.Embed(
         title=arg + " Server Info",
         description='Description: ' + description + '\nOnline: ' + online + '\nOnline Players: ' + playerCount,
-        color=discord.Color.dark_green()
+        color=discord.Color.blue()
     )
     embed.set_thumbnail(url="https://i1.wp.com/www.craftycreations.net/wp-content/uploads/2019/08/Grass-Block-e1566147655539.png?fit=500%2C500&ssl=1")
 
