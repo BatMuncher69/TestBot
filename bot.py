@@ -6,16 +6,23 @@ import random
 import json
 import youtube_dl
 
+DEFAULT_PREFIX = "."
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
+
 
 def get_prefix(client, message):
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
+    try:
+        prefix = prefixes[str(message.guild.id)]
+        return prefix
+    except KeyError:
+        return DEFAULT_PREFIX
 
-    return prefixes[str(message.guild.id)]
 
-client = commands.Bot(command_prefix= get_prefix, intents=intents)
+client = commands.Bot(command_prefix=get_prefix, intents=intents)
 status = cycle(['Halo', 'with children'])
+
 
 @client.event
 async def on_ready():
@@ -30,14 +37,14 @@ async def on_guild_join(guild):
         prefixes = json.load(f)
 
     prefixes[str(guild.id)] = '.'
-    
 
     with open('prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
 
+
 @client.event
 async def on_guild_remove(guild):
-    with open('prefixes.json', 'r') as f:       
+    with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
     prefixes.pop(str(guild.id))
@@ -46,23 +53,24 @@ async def on_guild_remove(guild):
         json.dump(prefixes, f, indent=4)
 
 
-@client.command()
-async def changeprefix(ctx, prefix):
+@client.command(name="changeprefix")
+async def change_prefix(ctx, prefix):
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
     prefixes[str(ctx.guild.id)] = prefix
-    
 
     with open('prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
 
     await ctx.send(f'Prefix changed to: {prefix}')
 
+
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Invalid command.')
+
 
 def admin(ctx):
     return ctx.author.id == 293019756263374850
@@ -70,10 +78,8 @@ def admin(ctx):
 
 @client.command()
 @commands.check(admin)
-async def clear(ctx, amount : int):
+async def clear(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
-
-
 
 
 @client.command()
@@ -82,17 +88,15 @@ async def example(ctx):
     await ctx.send(f'Bonjour {ctx.author}')
 
 
-@clear.error 
+@clear.error
 async def clear_error(ctx, error):
-     if isinstance(error, commands.MissingRequiredArgument):
+    if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Please specify an amount of messages to delete.')
-
 
 
 @tasks.loop(seconds=100)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
-
 
 
 @client.command()
@@ -151,8 +155,6 @@ async def unban(ctx, *, member):
             return
 
 
-
-
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
     responses = ["It is certain.",
@@ -178,9 +180,8 @@ async def _8ball(ctx, *, question):
     await ctx.send(f'question: {question}\nAnswer: {random.choice(responses)}')
 
 
-
 @client.command()
-async def play(ctx, url : str):
+async def play(ctx, url: str):
     song_there = os.path.isfile("song.mp3")
     try:
         if song_there:
@@ -189,8 +190,8 @@ async def play(ctx, url : str):
         await ctx.send("Wait for the current playing music to end or use the 'stop' command")
         return
 
-    voiceChannel = discord.utils.get(ctx.guild.voice_channels, name='General')
-    await voiceChannel.connect()
+    voice_channel = discord.utils.get(ctx.guild.voice_channels, name='General')
+    await voice_channel.connect()
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
 
     ydl_opts = {
@@ -242,24 +243,6 @@ async def stop(ctx):
     voice.stop()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @client.command()
 async def shutdown(ctx):
     with open("./data/auth.json", "r") as auth:
@@ -298,7 +281,7 @@ def start_check():
 
 start_check()
 
-with open("./data/token", "r") as f:
-    token = f.read()
+with open("./data/token", "r") as token_file:
+    token = token_file.read()
 
 client.run(token)
