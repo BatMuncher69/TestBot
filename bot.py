@@ -84,9 +84,10 @@ def admin(ctx):
     return ctx.author.id == 293019756263374850
 
 
+
 @client.command()
 @commands.check(admin)
-async def clear(ctx, amount: int):
+async def clear(ctx, amount : int):
     await ctx.channel.purge(limit=amount)
 
 
