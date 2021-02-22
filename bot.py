@@ -513,9 +513,14 @@ async def on_member_remove(member):
 def start_check():
     import startup
     for item in dir(startup):
+        executed = False
         item = getattr(startup, item)
         if callable(item):
-            item()
+            for function in startup.executed_functions:
+                if item == function:
+                    executed = True
+            if not executed:
+                item()
 
 
 start_check()
