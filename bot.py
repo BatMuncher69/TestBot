@@ -2,13 +2,14 @@ import discord
 import os
 from discord.ext import commands, tasks
 from discord.voice_client import VoiceClient
+from discord.utils import get
 from itertools import cycle
 from random import choice
 import random
 import json
 import requests
 import youtube_dl
-import asyncio
+import shutil
 
 
 
@@ -30,7 +31,7 @@ def get_prefix(client, message):
 
 client = commands.Bot(command_prefix=get_prefix, intents=intents)
 status = cycle(['Halo', 'with children'])
-
+client.remove_command("help")
 
 @client.event
 async def on_ready():
@@ -82,6 +83,23 @@ async def on_command_error(ctx, error):
 
 def admin(ctx):
     return ctx.author.id == 293019756263374850
+
+@client.group(invoke_without_command=True)
+async def help(ctx):
+    em = discord.Embed(title = "Help", description = "use .help <command> for more info on a command.", color = ctx.author.color)
+
+    em.add_field(name = "moderation", value = "clear, kick, ban, whois")
+    em.add_field(name = "fun", value = "8ball" )
+    em.add_field(name = "random", value = "minecraft, hello")
+
+@help.command()
+async def ban(ctx):
+    em = discord.Embed(title = "ban", description = "Bans a member", color = ctx.author.color)
+    
+    em.add_field(name = "Syntax", Value = ".ban <member> [reason]")
+
+    await ctx.send(embed = em)
+
 
 
 
@@ -165,7 +183,17 @@ async def unban(ctx, *, member):
 
 
 
-
+# @client.event
+# async def on_message(message):
+#     if message.author != client.user and message.content.startswith(command_prefix):
+#         if len(message.content.replace(command_prefix, '')) >= 1:
+#             location = message.content.replace(command_prefix, '').lower()
+#             url = f'http://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=imperial'
+#             try:
+#                 data = parse_data(json.loads(requests.get(url).content)['main'])
+#                 await message.channel.send(embed=weather_message(data, location))
+#             except KeyError:
+#                 await message.channel.send(embed=error_message(location))
 
 @client.command()
 async def minecraft(ctx, arg):
@@ -184,6 +212,16 @@ async def minecraft(ctx, arg):
     embed.set_thumbnail(url="https://i1.wp.com/www.craftycreations.net/wp-content/uploads/2019/08/Grass-Block-e1566147655539.png?fit=500%2C500&ssl=1")
 
     await ctx.send(embed=embed)
+
+@client.command(aliases=['user','info'])
+async def whois(ctx, member : discord.Member):
+    embed = discord.Embed(title = member.name, description = member.mention , color = discord.Color.orange())
+    embed.add_field(name = "ID", value= member.id, inline = True)
+    embed.set_thumbnail(url = member.avatar_url)
+    embed.set_footer(icon_url= ctx.author.avatar_url, text = f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+
 
 
 @client.command(aliases=['8ball'])
@@ -210,6 +248,10 @@ async def _8ball(ctx, *, question):
                  "Very doubtful."]
     await ctx.send(f'question: {question}\nAnswer: {random.choice(responses)}')
 
+# @client.command()
+# async def game(ctx)
+#     games = ['']
+
 
 @client.command(name='hello', help='This command says hello', aliases=['hi','hey'])
 async def hello(ctx):
@@ -218,134 +260,227 @@ async def hello(ctx):
     await ctx.send(f'{random.choice(responses)}')
 
 
-
-# youtube_dl.utils.bug_reports_message = lambda: ''
-
-# ytdl_format_options = {
-#     'format': 'bestaudio/best',
-#     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-#     'restrictfilenames': True,
-#     'noplaylist': True,
-#     'nocheckcertificate': True,
-#     'ignoreerrors': False,
-#     'logtostderr': False,
-#     'quiet': True,
-#     'no_warnings': True,
-#     'default_search': 'auto',
-#     'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-# }
-
-# ffmpeg_options = {
-#     'options': '-vn'
-# }
-
-# ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
-# class YTDLSource(discord.PCMVolumeTransformer):
-#     def __init__(self, source, *, data, volume=0.5):
-#         super().__init__(source, volume)
-
-#         self.data = data
-
-#         self.title = data.get('title')
-#         self.url = data.get('url')
-
-#     @classmethod
-#     async def from_url(cls, url, *, loop=None, stream=False):
-#         loop = loop or asyncio.get_event_loop()
-#         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-
-#         if 'entries' in data:
-#             # take first item from a playlist
-#             data = data['entries'][0]
-
-#         filename = data['url'] if stream else ytdl.prepare_filename(data)
-#         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-
-# queue = []
-
-
-
-# @client.command(name='die', help='This command returns a random last words')
-# async def die(ctx):
-#     responses = ['why have you brought my short life to an end', 'i could have done so much more', 'i have a family, kill them instead']
-#     await ctx.send(choice(responses))
-
-
-
-# @client.command(name='join', help='This command makes the bot join the voice channel')
-# async def join(ctx):
-#     if not ctx.message.author.voice:
-#         await ctx.send("You are not connected to a voice channel")
-#         return
+@client.command()
+async def flagQuiz(ctx):
+    flags = {
+  "usa": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/220px-Flag_of_the_United_States.svg.png",
+  "china": "https://images-ext-1.discordapp.net/external/OkuHe2vSzVRSBg2c7sFag1GLJEs6xPRo6T48dCyfZbQ/https/upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_the_People%2527s_Republic_of_China.svg/1200px-Flag_of_the_People%2527s_Republic_of_China.svg.png?width=705&height=470",
+}
     
-#     else:
-#         channel = ctx.message.author.voice.channel
+    await ctx.send(flags)
 
-#     await channel.connect()
+@client.command(pass_context=True, aliases=['j', 'joi'])
+async def join(ctx):
+    global voice
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
 
-# @client.command(name='queue', help='This command adds a song to the queue')
-# async def queue_(ctx, url):
-#     global queue
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
 
-#     queue.append(url)
-#     await ctx.send(f'`{url}` added to queue!')
+    await voice.disconnect()
 
-# @client.command(name='remove', help='This command removes an item from the list')
-# async def remove(ctx, number):
-#     global queue
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+        print(f"The bot has connected to {channel}\n")
 
-#     try:
-#         del(queue[int(number)])
-#         await ctx.send(f'Your queue is now `{queue}!`')
-    
-#     except:
-#         await ctx.send('Your queue is either **empty** or the index is **out of range**')
-        
-# @client.command(name='play', help='This command plays songs')
-# async def play(ctx):
-#     global queue
+    await ctx.send(f"Joined {channel}")
 
-#     server = ctx.message.guild
-#     voice_channel = server.voice_client
 
-#     async with ctx.typing():
-#         player = await YTDLSource.from_url(queue[0], loop=client.loop)
-#         voice_channel.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+@client.command(pass_context=True, aliases=['l', 'lea'])
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
 
-#     await ctx.send('**Now playing:** {}'.format(player.title))
-#     del(queue[0])
+    if voice and voice.is_connected():
+        await voice.disconnect()
+        print(f"The bot has left {channel}")
+        await ctx.send(f"Left {channel}")
+    else:
+        print("Bot was told to leave voice channel, but was not in one")
+        await ctx.send("Don't think I am in a voice channel")
 
-# @client.command(name='pause', help='This command pauses the song')
-# async def pause(ctx):
-#     server = ctx.message.guild
-#     voice_channel = server.voice_client
 
-#     voice_channel.pause()
+@client.command(pass_context=True, aliases=['p', 'pla'])
+async def play(ctx, url: str):
 
-# @client.command(name='resume', help='This command resumes the song!')
-# async def resume(ctx):
-#     server = ctx.message.guild
-#     voice_channel = server.voice_client
+    def check_queue():
+        Queue_infile = os.path.isdir("./Queue")
+        if Queue_infile is True:
+            DIR = os.path.abspath(os.path.realpath("Queue"))
+            length = len(os.listdir(DIR))
+            still_q = length - 1
+            try:
+                first_file = os.listdir(DIR)[0]
+            except:
+                print("No more queued song(s)\n")
+                queues.clear()
+                return
+            main_location = os.path.dirname(os.path.realpath(__file__))
+            song_path = os.path.abspath(os.path.realpath("Queue") + "\\" + first_file)
+            if length != 0:
+                print("Song done, playing next queued\n")
+                print(f"Songs still in queue: {still_q}")
+                song_there = os.path.isfile("song.mp3")
+                if song_there:
+                    os.remove("song.mp3")
+                shutil.move(song_path, main_location)
+                for file in os.listdir("./"):
+                    if file.endswith(".mp3"):
+                        os.rename(file, 'song.mp3')
 
-#     voice_channel.resume()
+                voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: check_queue())
+                voice.source = discord.PCMVolumeTransformer(voice.source)
+                voice.source.volume = 0.07
 
-# @client.command(name='view', help='This command shows the queue')
-# async def view(ctx):
-#     await ctx.send(f'Your queue is now `{queue}!`')
+            else:
+                queues.clear()
+                return
 
-# @client.command(name='leave', help='This command stops makes the bot leave the voice channel')
-# async def leave(ctx):
-#     voice_client = ctx.message.guild.voice_client
-#     await voice_client.disconnect()
+        else:
+            queues.clear()
+            print("No songs were queued before the ending of the last song\n")
 
-# @client.command(name='stop', help='This command stops the song!')
-# async def stop(ctx):
-#     server = ctx.message.guild
-#     voice_channel = server.voice_client
 
-#     voice_channel.stop()
+
+    song_there = os.path.isfile("song.mp3")
+    try:
+        if song_there:
+            os.remove("song.mp3")
+            queues.clear()
+            print("Removed old song file")
+    except PermissionError:
+        print("Trying to delete song file, but it's being played")
+        await ctx.send("ERROR: Music playing")
+        return
+
+
+    Queue_infile = os.path.isdir("./Queue")
+    try:
+        Queue_folder = "./Queue"
+        if Queue_infile is True:
+            print("Removed old Queue Folder")
+            shutil.rmtree(Queue_folder)
+    except:
+        print("No old Queue folder")
+
+    await ctx.send("Getting everything ready now")
+
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print("Downloading audio now\n")
+        ydl.download([url])
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            name = file
+            print(f"Renamed File: {file}\n")
+            os.rename(file, "song.mp3")
+
+    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: check_queue())
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+
+    nname = name.rsplit("-", 2)
+    await ctx.send(f"Playing: {nname[0]}")
+    print("playing\n")
+
+
+@client.command(pass_context=True, aliases=['pa', 'pau'])
+async def pause(ctx):
+
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        print("Music paused")
+        voice.pause()
+        await ctx.send("Music paused")
+    else:
+        print("Music not playing failed pause")
+        await ctx.send("Music not playing failed pause")
+
+
+@client.command(pass_context=True, aliases=['r', 'res'])
+async def resume(ctx):
+
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_paused():
+        print("Resumed music")
+        voice.resume()
+        await ctx.send("Resumed music")
+    else:
+        print("Music is not paused")
+        await ctx.send("Music is not paused")
+
+
+@client.command(pass_context=True, aliases=['s', 'sto'])
+async def stop(ctx):
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    queues.clear()
+
+    if voice and voice.is_playing():
+        print("Music stopped")
+        voice.stop()
+        await ctx.send("Music stopped")
+    else:
+        print("No music playing failed to stop")
+        await ctx.send("No music playing failed to stop")
+
+
+queues = {}
+
+@client.command(pass_context=True, aliases=['q', 'que'])
+async def queue(ctx, url: str):
+    Queue_infile = os.path.isdir("./Queue")
+    if Queue_infile is False:
+        os.mkdir("Queue")
+    DIR = os.path.abspath(os.path.realpath("Queue"))
+    q_num = len(os.listdir(DIR))
+    q_num += 1
+    add_queue = True
+    while add_queue:
+        if q_num in queues:
+            q_num += 1
+        else:
+            add_queue = False
+            queues[q_num] = q_num
+
+    queue_path = os.path.abspath(os.path.realpath("Queue") + f"\song{q_num}.%(ext)s")
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'outtmpl': queue_path,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print("Downloading audio now\n")
+        ydl.download([url])
+    await ctx.send("Adding song " + str(q_num) + " to the queue")
+
+    print("Song added to queue\n")
 
 
 
