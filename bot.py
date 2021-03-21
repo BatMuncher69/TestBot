@@ -27,7 +27,7 @@ def get_prefix(client, message):
         return DEFAULT_PREFIX
 
 
-client = commands.Bot(command_prefix=get_prefix, intents=intents)
+client = commands.Bot(command_prefix=get_prefix, intents=intents, help=help)
 client.remove_command("help")
 status = cycle(['Halo', 'with children', 'with Masterchiefs balls'])
 
@@ -209,7 +209,7 @@ async def whois(ctx, member : discord.Member):
 
 
 
-@client.command(aliases=['8ball'])
+@client.command(aliases=['8ball'])  #calculating............... with8balls
 async def _8ball(ctx, *, question):
     responses = ["It is certain.",
                  "It is decidedly so.",
@@ -231,7 +231,7 @@ async def _8ball(ctx, *, question):
                  "My sources say no.",
                  "Outlook not so good.",
                  "Very doubtful."]
-    await ctx.send(f'question: {question}\nAnswer: {random.choice(responses)}')
+    await ctx.send(f'question: {question}\nAnswer: {random.choice(responses)} :8ball:')
 
 # @client.command()
 # async def game(ctx)

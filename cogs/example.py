@@ -17,7 +17,7 @@ class Example(commands.Cog):
 		await ctx.send('Pong')
 		
 		
-	@commands.command(invoke_without_command=True)
+	@commands.command(aliases=['help'])
 	async def helpp(self, ctx):
 		embed = discord.Embed(title = "Help", description = "use .help <command> for more info on a command.", color = ctx.author.color())
 		embed.add_field(name = "moderation", value = "clear, kick, ban, whois")
